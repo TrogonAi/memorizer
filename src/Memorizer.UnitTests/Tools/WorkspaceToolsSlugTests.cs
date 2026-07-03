@@ -54,6 +54,25 @@ public class WorkspaceToolsSlugTests
     }
 
     [Fact]
+    public async Task GetWorkspace_BySlug_ShouldNormalizeToLowercase()
+    {
+        // Arrange
+        var workspaceId = new WorkspaceId(Guid.Parse("b775bb37-4af5-46fe-ad14-7f6fba7889aa"));
+        var fakeStorage = new FakeWorkspaceStorage
+        {
+            WorkspaceBySlug = CreateTestWorkspace(workspaceId, "Engineering")
+        };
+        var tools = CreateTools(fakeStorage);
+
+        // Act: caller passes a mixed-case, padded slug
+        var result = await tools.GetWorkspace(slug: "  Engineering  ");
+
+        // Assert: storage is queried with the canonical lowercase, trimmed slug
+        Assert.Equal("engineering", fakeStorage.LastSlugQueried);
+        Assert.Contains("Workspace: Engineering", result);
+    }
+
+    [Fact]
     public async Task GetWorkspace_BySlug_WhenNotFound_ShouldReturnNotFoundMessage()
     {
         // Arrange
@@ -67,8 +86,7 @@ public class WorkspaceToolsSlugTests
         var result = await tools.GetWorkspace(slug: "missing");
 
         // Assert
-        Assert.Contains("slug 'missing' not found", result);
-        Assert.Contains("among root workspaces", result);
+        Assert.Contains("Workspace with slug 'missing' not found among root workspaces.", result);
     }
 
     [Fact]
@@ -86,8 +104,7 @@ public class WorkspaceToolsSlugTests
         var result = await tools.GetWorkspace(slug: "missing", parentWorkspaceId: parentId.Value.ToString());
 
         // Assert
-        Assert.Contains("slug 'missing' not found", result);
-        Assert.Contains(parentId.Value.ToString(), result);
+        Assert.Contains($"Workspace with slug 'missing' not found under parent {parentId.Value}", result);
     }
 
     [Fact]

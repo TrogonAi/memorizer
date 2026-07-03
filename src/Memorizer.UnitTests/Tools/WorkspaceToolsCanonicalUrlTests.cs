@@ -1,12 +1,8 @@
 using Memorizer.Models;
 using Memorizer.Models.Enums;
 using Memorizer.Models.ValueTypes;
-using Memorizer.Services;
-using Memorizer.Settings;
 using Microsoft.Extensions.Logging.Abstractions;
 using PostgMem.Tools;
-using Pgvector;
-using System.Text.Json;
 
 namespace Memorizer.UnitTests.Tools;
 

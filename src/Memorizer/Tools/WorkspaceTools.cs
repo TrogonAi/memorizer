@@ -48,13 +48,15 @@ public class WorkspaceTools
         // If slug is provided, look it up (optionally scoped to a parent workspace)
         if (!string.IsNullOrWhiteSpace(slug))
         {
+            // Slugs are stored lowercase (see GenerateSlug); normalize so lookups are case-insensitive.
+            var normalizedSlug = slug.Trim().ToLowerInvariant();
             var parsedParentId = ParseOptionalGuid(parentWorkspaceId);
             var parentId = parsedParentId.HasValue ? new WorkspaceId(parsedParentId.Value) : (WorkspaceId?)null;
-            var bySlug = await _storage.GetWorkspaceBySlugAsync(slug, parentId, cancellationToken);
+            var bySlug = await _storage.GetWorkspaceBySlugAsync(normalizedSlug, parentId, cancellationToken);
             if (bySlug == null)
             {
                 var scope = parentId.HasValue ? $" under parent {parentId.Value.Value}" : " among root workspaces";
-                return $"Workspace with slug '{slug}' not found{scope}.";
+                return $"Workspace with slug '{normalizedSlug}' not found{scope}.";
             }
             return await GetWorkspaceDetailsAsync(bySlug, cancellationToken);
         }
